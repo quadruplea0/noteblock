@@ -138,16 +138,19 @@
       GtkWidget *btn_pause = gtk_button_new_with_label("Pause");
       GtkWidget *btn_stop = gtk_button_new_with_label("Stop");
       GtkWidget *btn_next = gtk_button_new_with_label("Next");
+      GtkWidget *btn_previous = gtk_button_new_with_label("Previous");
 
       gtk_container_add(GTK_CONTAINER(button_box), btn_play);
       gtk_container_add(GTK_CONTAINER(button_box), btn_pause);
       gtk_container_add(GTK_CONTAINER(button_box), btn_stop);
       gtk_container_add(GTK_CONTAINER(button_box), btn_next);
+      gtk_container_add(GTK_CONTAINER(button_box), btn_previous);
 
       g_signal_connect(btn_play, "clicked", G_CALLBACK(playButtonClicked), NULL);
       g_signal_connect(btn_pause, "clicked", G_CALLBACK(pauseButtonClicked), NULL);
       g_signal_connect(btn_stop, "clicked", G_CALLBACK(stopButtonClicked), NULL);
       g_signal_connect(btn_next, "clicked", G_CALLBACK(nextButtonClicked), NULL);
+      g_signal_connect(btn_previous, "clicked", G_CALLBACK(previousButtonClicked), NULL);
 
       g_timeout_add(1000, (GSourceFunc)songdetection, NULL);
 
