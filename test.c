@@ -5,10 +5,6 @@
 
   struct mpd_connection *mpd_conn = NULL;
   GtkTextBuffer *buffer = NULL;
-  
-
-
-
 
 
   static void errorchecker(struct mpd_connection *conn) {
@@ -18,8 +14,8 @@
   }
 
 
-  static void songdetection(void) {
-      if (mpd_conn == NULL) return;
+  static gboolean songdetection(gpointer data) {
+      if (mpd_conn == NULL || buffer == NULL) return TRUE;
 
       struct mpd_song *song = mpd_run_current_song(mpd_conn);
 
@@ -36,6 +32,7 @@
           }
           mpd_song_free(song);
       } 
+      return TRUE;
   }
 
   static void playButtonClicked(GtkWidget *widget, gpointer data) {
@@ -45,12 +42,19 @@
       }
   }
 
-
   static void nextButtonClicked(GtkWidget *widget, gpointer data) {
       if (mpd_conn) {
           mpd_run_next(mpd_conn);
           errorchecker(mpd_conn);
-          songdetection();
+          g_timeout_add(1000, (GSourceFunc)songdetection, NULL);
+      }
+  }
+
+    static void previousButtonClicked(GtkWidget *widget, gpointer data) {
+      if (mpd_conn) {
+          mpd_run_previous(mpd_conn);
+          errorchecker(mpd_conn);
+          g_timeout_add(1000, (GSourceFunc)songdetection, NULL);
       }
   }
 
@@ -79,8 +83,6 @@
 
 
 
-
-
   int main(int argc, char *argv[]) {
       unsigned int port = 6600;
 
@@ -106,7 +108,7 @@
       }
 
       
-
+     
       printf("connected on localhost:%u\n", port);
 
       GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
@@ -123,9 +125,9 @@
 
       GtkWidget *text_songinfo = gtk_text_view_new();
       gtk_text_view_set_editable(GTK_TEXT_VIEW(text_songinfo), FALSE);
-    
-      buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text_songinfo));
 
+      buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text_songinfo));
+     
       gtk_box_pack_start(GTK_BOX(main_box), text_songinfo, TRUE, TRUE, 5);
 
       buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text_songinfo));
@@ -147,7 +149,7 @@
       g_signal_connect(btn_stop, "clicked", G_CALLBACK(stopButtonClicked), NULL);
       g_signal_connect(btn_next, "clicked", G_CALLBACK(nextButtonClicked), NULL);
 
-      songdetection();
+      g_timeout_add(1000, (GSourceFunc)songdetection, NULL);
 
       gtk_widget_show_all(window);
       gtk_main();
